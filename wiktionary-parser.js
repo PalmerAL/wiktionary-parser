@@ -18,7 +18,7 @@ function getDictionaryInfo(word, wordLanguage, callback) {
 
 		var heading1Regex = /^(==)([\w\s]+)(==)$/g;
 		var heading2Regex = /^(===)([\w\s]+)(===)$/g;
-		var linkRegex = /(\[+)(\w+)(\]+)/g;
+		var linkRegex = /(\[+)([\w\s-]+)(\]+)/g;
 		var type2LinkRegex = /(\[+)(\w+)([#|\w]+)(\]+)/g;
 		var wikipediaArticleRegex = /(\[+)(:?w:)([\w\s]+)\|([\w\s]+)(\]+)/g;
 		var contextDataRegex = /(\[+)([\w\W]+)(\]+)|({+)([\w\W]+)(}+)/g;
