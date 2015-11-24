@@ -16,6 +16,11 @@
 		$("#wk-demo-input").on("change", function() {
 			getDictionaryInfo($(this).val(), "English", function(data) {
 				output.html("");
+				
+				if(!data.definitions) {
+					output.html("<p>Word not found.</p>");
+				}
+				
 				$("<h1>").appendTo(output).text(data.title);
 
 				for (var i = 0; i < data.definitions.length; i++) {

@@ -7,6 +7,13 @@ function getDictionaryInfo(word, wordLanguage, callback) {
 		}
 
 		var title, content;
+		
+		//no results found
+		
+		if(!data || !data.query || !data.query.pages || data.query.pages[-1]) {
+			return callback({});
+		}
+		
 		for (var page in data.query.pages) {
 			title = data.query.pages[page].title;
 			content = data.query.pages[page].revisions[0]["*"];
@@ -18,6 +25,7 @@ function getDictionaryInfo(word, wordLanguage, callback) {
 
 		var heading1Regex = /^(==)([\w\s]+)(==)$/g;
 		var heading2Regex = /^(===)([\w\s]+)(===)$/g;
+		var heading3Regex = /^(====)([\w\s]+)(====)$/g;
 		var linkRegex = /(\[+)([\w\s-]+)(\]+)/g;
 		var type2LinkRegex = /(\[+)(\w+)([#|\w]+)(\]+)/g;
 		var wikipediaArticleRegex = /(\[+)(:?w:)([\w\s]+)\|([\w\s]+)(\]+)/g;
@@ -26,7 +34,7 @@ function getDictionaryInfo(word, wordLanguage, callback) {
 		var italicsRegex = /''/g;
 		var wordCharactersRegex = /\w/g;
 
-		var heading1, heading2;
+		var heading1, heading2, heading3;
 
 		function normalizeWikidata(text) {
 			text = text.replace(linkRegex, "$2"); //remove links to other words from definitions;
@@ -38,12 +46,16 @@ function getDictionaryInfo(word, wordLanguage, callback) {
 
 
 		text.forEach(function (line) {
+			//console.log(line);
 			//update the current heading if needed
 			if (heading1Regex.test(line)) {
 				heading1 = line.replace(heading1Regex, "$2");
 			}
 			if (heading2Regex.test(line)) {
 				heading2 = line.replace(heading2Regex, "$2");
+			}
+			if(heading3Regex.test(line)) {
+				heading3 = line.replace(heading3Regex, "$2");
 			}
 
 			//handle a definition the line contains one
@@ -55,9 +67,17 @@ function getDictionaryInfo(word, wordLanguage, callback) {
 				newDefinition = newDefinition.replace(italicsRegex, "");
 
 				if (wordCharactersRegex.test(newDefinition)) { //makes sure there is actually a definition
+					
+					var heading = heading2;
+					
+					//sometimes, the word type will actually be in heading 3. If the heading 2 looks like it isn't a part of speech, use heading 3 instead.
+					
+					if(heading.toLowerCase().indexOf("etymology") != -1 || heading.toLowerCase().indexOf("pronounciation") != -1) {
+						heading = heading3;
+					}
 					results.definitions.push({
 						meaning: newDefinition,
-						type: heading2
+						type: heading
 					});
 				}
 
